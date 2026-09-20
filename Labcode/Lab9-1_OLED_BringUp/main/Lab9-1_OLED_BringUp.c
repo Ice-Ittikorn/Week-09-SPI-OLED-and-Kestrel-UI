@@ -1,10 +1,18 @@
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
+#include "driver/spi_master.h"
+#include "esp_err.h"
+
 // 1. กำหนดขาเชื่อมต่อตามแผนภาพวงจรจริง (GPIO 18, 23, 4, 2, 5)
-#define OLED_PIN_SCK    (GPIO_NUM_18) // D0 (SPI Clock)
+#define OLED_PIN_SCK   (GPIO_NUM_18) // D0 (SPI Clock)
 #define OLED_PIN_MOSI   (GPIO_NUM_23) // D1 (SPI MOSI Data)
 #define OLED_PIN_RES    (GPIO_NUM_4)  // RES (Hardware Reset)
 #define OLED_PIN_DC     (GPIO_NUM_2)  // DC (0 = Command, 1 = Data)
 #define OLED_PIN_CS     (GPIO_NUM_5)  // CS (Chip Select - Active LOW)
 
+static uint8_t s_oled_buffer[1024]; // 128 คอลัมน์ x 8 เพจ = 1,024 ไบต์
 static spi_device_handle_t s_spi_handle = NULL;
 
 // 2. ฟังก์ชันกำหนดค่าเริ่มต้นพิน GPIO และบัสฮาร์ดแวร์ SPI2
@@ -68,6 +76,47 @@ void oled_send_data(const uint8_t *data, size_t len)
     spi_device_polling_transmit(s_spi_handle, &t);
 }
 
+
+// 1. ฟังก์ชันล้างหน้าจอในแรม (เคลียร์เป็นสีดำสนิท)
+void oled_clear(void)
+{
+    memset(s_oled_buffer, 0x00, sizeof(s_oled_buffer));
+}
+
+// 2. ฟังก์ชันจุดหรือดับพิกเซลด้วยสูตรคณิตศาสตร์ระดับบิต
+void oled_draw_pixel(int x, int y, bool color)
+{
+    // ป้องกันเขียนเกินขอบเขตจอ
+    if (x < 0 || x >= 128 || y < 0 || y >= 64) return;
+
+    // คำนวณดัชนีไบต์และตำแหน่งบิต
+    int byte_index = x + (y / 8) * 128;
+    int bit_offset = y % 8;
+
+    if (color) {
+        s_oled_buffer[byte_index] |= (1 << bit_offset);  // Bitwise OR เพื่อเปิดไฟ
+    } else {
+        s_oled_buffer[byte_index] &= ~(1 << bit_offset); // Bitwise AND-NOT เพื่อดับไฟ
+    }
+}
+
+// 3. ฟังก์ชันส่งถ่ายข้อมูล 1,024 ไบต์จากแรมขึ้นสู่หน้าจอจริง (Buffer Flush)
+void oled_flush(void)
+{
+    // กำหนดขอบเขตคอลัมน์ 0 ถึง 127
+    oled_send_cmd(0x21); // Set Column Address
+    oled_send_cmd(0x00); // Start Column (0)
+    oled_send_cmd(0x7F); // End Column (127)
+
+    // กำหนดขอบเขตเพจ 0 ถึง 7
+    oled_send_cmd(0x22); // Set Page Address
+    oled_send_cmd(0x00); // Start Page (0)
+    oled_send_cmd(0x07); // End Page (7)
+
+    // ยิงส่ง Framebuffer 1,024 ไบต์ทั้งหมดขึ้นสู่จอในคำสั่งเดียว
+    oled_send_data(s_oled_buffer, sizeof(s_oled_buffer));
+}
+
 void app_main(void)
 {
     // 1. เริ่มต้นระบบบัส SPI2 และตั้งค่าพิน DC/RES
@@ -103,4 +152,15 @@ void app_main(void)
     for (int page = 0; page < 8; page++) {
         oled_send_data(buffer, sizeof(buffer));
     }
+
+    // --- ต่อท้ายขั้นตอนที่ 4 ใน app_main() ---
+    vTaskDelay(pdMS_TO_TICKS(1500)); // ค้างจอขาวไว้ 1.5 วินาที
+
+    // 5. ทดสอบจุด 4 มุมจอ (Corner Pixels Test)
+    oled_clear();
+    oled_draw_pixel(0, 0, true);     // มุมบนซ้าย (โซนสีเหลือง)
+    oled_draw_pixel(127, 0, true);   // มุมบนขวา (โซนสีเหลือง)
+    oled_draw_pixel(0, 63, true);    // มุมล่างซ้าย (โซนสีฟ้า)
+    oled_draw_pixel(127, 63, true);  // มุมล่างขวา (โซนสีฟ้า)
+    oled_flush();
 }
