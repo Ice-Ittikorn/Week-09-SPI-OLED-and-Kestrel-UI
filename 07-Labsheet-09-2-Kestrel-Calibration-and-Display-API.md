@@ -369,6 +369,7 @@ Server: Kestrel
      -d '{"rawMin": 4000, "rawMax": 1000, "scaleMin": 0, "scaleMax": 100, "unit": "%"}'
    ```
    * **ผลที่คาดหวัง:** เซิร์ฟเวอร์ต้องตอบกลับด้วย **`400 Bad Request`** พร้อมข้อความเตือน `"RawMax ต้องมีค่ามากกว่า RawMin เสมอ!"` โดยที่เซิร์ฟเวอร์ Kestrel **ไม่ล่ม (No Server Crash)**!
+<img width="720" height="280" alt="image" src="https://github.com/user-attachments/assets/b987227a-9419-471d-bbb9-ca4695e3253c" />
 
 2. **ทดสอบส่งข้อความว่างเปล่า:**
    ```powershell
@@ -377,6 +378,7 @@ Server: Kestrel
      -d '{"message":""}'
    ```
    * **ผลที่คาดหวัง:** ได้รับ **`400 Bad Request`** แจ้งว่าข้อความต้องไม่ว่างเปล่า
+<img width="638" height="185" alt="image" src="https://github.com/user-attachments/assets/1456cc03-459a-443b-a8be-ea85fbccc09f" />
 
 ---
 
