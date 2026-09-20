@@ -1,6 +1,0 @@
-"-specs=/Users/ittikorntongsima/Store/KMITl/IOT/Week-09-SPI-OLED-and-Kestrel-UI/Labcode/Lab9-1_OLED_BringUp/build/bootloader/specs/picolibc.specs"
--Wno-frame-address
--mlongcalls
--fno-builtin-memcpy
--fno-builtin-memset
--fno-builtin-bzero
