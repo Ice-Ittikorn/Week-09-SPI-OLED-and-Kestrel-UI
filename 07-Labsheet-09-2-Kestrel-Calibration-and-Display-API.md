@@ -223,6 +223,7 @@ app.Run();
 7. กด F5 เพื่อ Refresh หน้าเว็บ
 8. สังเกต Raw HTTP Response Headers
 
+<img width="1512" height="838" alt="image" src="https://github.com/user-attachments/assets/30b2ff3f-df5b-49d5-9c6b-caef1d1cebbd" />
 
 ---
 
