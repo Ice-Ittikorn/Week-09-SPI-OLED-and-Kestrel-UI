@@ -208,6 +208,8 @@ void app_main(void)
 
 *หมายเหตุ* จอภาพของเราจะมีสองสี โซนด้านบนเป็นสีเหลือง โซนด้านล่างเป็นสีฟ้าสด
 
+<img width="3024" height="4032" alt="IMG_4482" src="https://github.com/user-attachments/assets/7a30b118-e646-4632-9b2d-5464b4fd8542" />
+
 
 ---
 
