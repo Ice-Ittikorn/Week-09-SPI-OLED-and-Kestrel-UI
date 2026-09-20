@@ -4,6 +4,15 @@
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include "esp_err.h"
+#include "esp_log.h"
+#include "font5x7.h"
+
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(b)  \
+    ((b) & 0x80 ? '1' : '0'), ((b) & 0x40 ? '1' : '0'), \
+    ((b) & 0x20 ? '1' : '0'), ((b) & 0x10 ? '1' : '0'), \
+    ((b) & 0x08 ? '1' : '0'), ((b) & 0x04 ? '1' : '0'), \
+    ((b) & 0x02 ? '1' : '0'), ((b) & 0x01 ? '1' : '0')
 
 // 1. กำหนดขาเชื่อมต่อตามแผนภาพวงจรจริง (GPIO 18, 23, 4, 2, 5)
 #define OLED_PIN_SCK   (GPIO_NUM_18) // D0 (SPI Clock)
@@ -117,6 +126,40 @@ void oled_flush(void)
     oled_send_data(s_oled_buffer, sizeof(s_oled_buffer));
 }
 
+// ฟังก์ชันวาดตัวอักษรเดี่ยว 1 ตัวจากตาราง Font Matrix 5x7
+void oled_draw_char(int x, int y, char c, bool color)
+{
+    if (c < 32 || c > 126) c = '?'; // ถ้าอยู่นอกช่วง ASCII ให้แสดงเป็น '?'
+
+    int font_idx = c - 32;
+
+    for (int col = 0; col < 5; col++) {
+        uint8_t line = font5x7[font_idx][col];
+        for (int row = 0; row < 7; row++) {
+            if (line & (1 << row)) {
+                oled_draw_pixel(x + col, y + row, color);
+            } else {
+                oled_draw_pixel(x + col, y + row, !color);
+            }
+        }
+    }
+    // เว้นช่องไฟระหว่างตัวอักษร 1 พิกเซล
+    for (int row = 0; row < 7; row++) {
+        oled_draw_pixel(x + 5, y + row, !color);
+    }
+}
+
+// ฟังก์ชันพิมพ์สตริงข้อความเรียงต่อกัน
+void oled_draw_string(int x, int y, const char *str, bool color)
+{
+    while (*str) {
+        oled_draw_char(x, y, *str, color);
+        x += 6; // ตัวอักษรกว้าง 5 พิกเซล + ช่องไฟ 1 พิกเซล
+        if (x + 6 > 128) break; // ป้องกันข้อความล้นขอบจอขวา
+        str++;
+    }
+}
+
 void app_main(void)
 {
     // 1. เริ่มต้นระบบบัส SPI2 และตั้งค่าพิน DC/RES
@@ -128,7 +171,7 @@ void app_main(void)
     gpio_set_level(OLED_PIN_RES, 1); // ดึง HIGH กลับพร้อมทำงาน
     vTaskDelay(pdMS_TO_TICKS(15));
 
-    // 3. ส่งชุดคำสั่ง Magic Sequence เปิดวงจรทวีแรงดัน (Charge Pump) และเปิดจอ
+    // 3. ส่งคำสั่งเปิดวงจรทวีแรงดัน (Charge Pump) และเปิดจอ
     // ------------------------------
     // step 1 Set Display OFF ปิดการแสดงผลชั่วคราวเพื่อเตรียมการคอนฟิกเรจิสเตอร์
     oled_send_cmd(0xAE); // Display OFF
@@ -142,8 +185,6 @@ void app_main(void)
     oled_send_cmd(0xAF); // Display ON!
     // หมายเหตุ ในตัวอย่างนี้ไม่ได้ตั้งค่าครบทุกเงื่อนไข ให้ไปดูในตารางลำดับคำสั่งมาตรฐานในการเริ่มต้นระบบ (หัวข้อ 9.2.2)
 
-
-
     // 4. ทดสอบถมหน้าจอ (สว่างทั้งจอ 1,024 ไบต์)
     uint8_t buffer[128];
     memset(buffer, 0xFF, sizeof(buffer));
@@ -152,15 +193,31 @@ void app_main(void)
     for (int page = 0; page < 8; page++) {
         oled_send_data(buffer, sizeof(buffer));
     }
-
-    // --- ต่อท้ายขั้นตอนที่ 4 ใน app_main() ---
-    vTaskDelay(pdMS_TO_TICKS(1500)); // ค้างจอขาวไว้ 1.5 วินาที
+    vTaskDelay(pdMS_TO_TICKS(1500)); // โชว์จอขาว 1.5 วินาที
 
     // 5. ทดสอบจุด 4 มุมจอ (Corner Pixels Test)
     oled_clear();
-    oled_draw_pixel(0, 0, true);     // มุมบนซ้าย (โซนสีเหลือง)
-    oled_draw_pixel(127, 0, true);   // มุมบนขวา (โซนสีเหลือง)
-    oled_draw_pixel(0, 63, true);    // มุมล่างซ้าย (โซนสีฟ้า)
-    oled_draw_pixel(127, 63, true);  // มุมล่างขวา (โซนสีฟ้า)
+    oled_draw_pixel(0, 0, true);     // มุมบนซ้าย (เหลือง)
+    oled_draw_pixel(127, 0, true);   // มุมบนขวา (เหลือง)
+    oled_draw_pixel(0, 63, true);    // มุมล่างซ้าย (ฟ้า)
+    oled_draw_pixel(127, 63, true);  // มุมล่างขวา (ฟ้า)
     oled_flush();
+    vTaskDelay(pdMS_TO_TICKS(1500)); // โชว์ 4 จุด 1.5 วินาที
+
+    // 6. พิมพ์ข้อความ Hello World และ รหัสนักศึกษา
+    oled_clear();
+    oled_draw_string(30, 4, "HELLO WORLD", true);   // โซนสีเหลือง
+    oled_draw_string(24, 32, "ID: 65012345", true);  // โซนสีฟ้า
+    oled_flush();
+
+    // Framebuffer Forensics: ตัว 'H' วาดที่ x=30, y=4 กว้าง 5 คอลัมน์
+    // y=4..10 จึงคร่อมเพจ 0 (บิต 4-7) และเพจ 1 (บิต 0-2)
+    for (int page = 0; page < 2; page++) {
+        ESP_LOGI("FORENSIC", "=== DUMPING FRAMEBUFFER PAGE %d (Col 30-35, letter 'H') ===", page);
+        for (int col = 30; col < 36; col++) {
+            uint8_t b = s_oled_buffer[col + page * 128];
+            printf("Byte[%3d] (Col %2d): 0x%02X  [Binary: " BYTE_TO_BINARY_PATTERN "]\n",
+                   col + page * 128, col, b, BYTE_TO_BINARY(b));
+        }
+    }
 }
