@@ -77,3 +77,5 @@
 /Users/ittikorntongsima/Store/KMITl/IOT/Week-09-SPI-OLED-and-Kestrel-UI/Labcode/lab9-3/ESP32.Kestrel.Webserver/obj/Debug/net10.0/ESP32.Kestrel.Webserver.pdb
 /Users/ittikorntongsima/Store/KMITl/IOT/Week-09-SPI-OLED-and-Kestrel-UI/Labcode/lab9-3/ESP32.Kestrel.Webserver/obj/Debug/net10.0/ESP32.Kestrel.Webserver.genruntimeconfig.cache
 /Users/ittikorntongsima/Store/KMITl/IOT/Week-09-SPI-OLED-and-Kestrel-UI/Labcode/lab9-3/ESP32.Kestrel.Webserver/obj/Debug/net10.0/ref/ESP32.Kestrel.Webserver.dll
+/Users/ittikorntongsima/Store/KMITl/IOT/Week-09-SPI-OLED-and-Kestrel-UI/Labcode/lab9-3/ESP32.Kestrel.Webserver/bin/Debug/net10.0/ESP32.Kestrel.Webserver.staticwebassets.runtime.json
+/Users/ittikorntongsima/Store/KMITl/IOT/Week-09-SPI-OLED-and-Kestrel-UI/Labcode/lab9-3/ESP32.Kestrel.Webserver/obj/Debug/net10.0/compressed/gz4kvsbe4y-{0}-m0gtk0tb06-m0gtk0tb06.gz
