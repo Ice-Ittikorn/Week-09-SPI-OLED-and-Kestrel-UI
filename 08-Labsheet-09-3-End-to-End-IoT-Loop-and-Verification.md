@@ -757,6 +757,15 @@ dotnet run
 1. **ทดสอบปิด Kestrel ด้วย `Ctrl+C`**
    - ภายในเวลาประมาณ 1.5 วินาที หน้าจอ OLED จะต้องดีดกลับไปเป็น `EDGE: LOCAL EDGE` โดยอัตโนมัติ
    - เมื่อรัน `dotnet run` ใหม่อีกครั้ง จอ OLED จะต้องกลับมาเป็น `CLOUD: READY` โดยที่เฟิร์มแวร์ ESP32 ไม่ค้างหรือไม่ต้องกดปุ่มรีเซ็ตฮาร์ดแวร์เลย
+<img width="1129" height="322" alt="image" src="https://github.com/user-attachments/assets/bf64005b-3056-45bf-9bbb-874a3cf5bcd4" />
+
+
+
+## ปิด Kestrel
+<img width="3024" height="4032" alt="IMG_4489" src="https://github.com/user-attachments/assets/9cc54436-fd0a-4e6c-9681-c8b889157874" />
+
+## เปิด Kestrel อีกครั้ง
+<img width="3024" height="4032" alt="IMG_4491" src="https://github.com/user-attachments/assets/d79451d0-cc13-4b0b-995c-e934ba14a983" />
 
 ---
 
