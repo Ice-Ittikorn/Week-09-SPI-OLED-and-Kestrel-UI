@@ -759,6 +759,7 @@ dotnet run
    - เมื่อรัน `dotnet run` ใหม่อีกครั้ง จอ OLED จะต้องกลับมาเป็น `CLOUD: READY` โดยที่เฟิร์มแวร์ ESP32 ไม่ค้างหรือไม่ต้องกดปุ่มรีเซ็ตฮาร์ดแวร์เลย
 <img width="1129" height="322" alt="image" src="https://github.com/user-attachments/assets/bf64005b-3056-45bf-9bbb-874a3cf5bcd4" />
 
+<img width="3024" height="4032" alt="IMG_4488" src="https://github.com/user-attachments/assets/3b066abd-541f-4237-bdfa-da20eb0d7739" />
 
 
 ## ปิด Kestrel
